@@ -41,6 +41,7 @@ class ConfigHolder():
 	def reset_config(self):
 		self.config = {
 			"log_channel": None,
+			"punish_channel": None,
 			"owner": None,
 			"headmod": None,
 			"moders": []

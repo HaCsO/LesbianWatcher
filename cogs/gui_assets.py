@@ -53,13 +53,13 @@ class WarnCard(discord.ui.View):
 	@discord.ui.button(label="Снять варн", style=discord.ButtonStyle.green)
 	async def button_unwarn(self, button, interaction):
 		self.message_cache = interaction.message
-		self.unwarn()
+		await self.unwarn()
 		await interaction.response.edit_message(embed= self.update_embed(), view= self)
 
 	@discord.ui.button(label="Снять все варны", style=discord.ButtonStyle.secondary)
 	async def button_purge_warns(self, button, interaction):
 		self.message_cache = interaction.message
-		self.purge_warns()
+		await self.purge_warns()
 		await interaction.response.edit_message(embed= self.update_embed(), view= self)
 
 	@discord.ui.select(placeholder="Выберите варн")
@@ -103,7 +103,7 @@ class WarnCard(discord.ui.View):
 			self.add_item(self.select_callback)
 		return True
 
-	def warn(self, reason= "Не указана"):
+	async def warn(self, reason= "Не указана"):
 		res, db, cur = self.get_structured_db_info()
 		if res:
 			dat = res[1]
@@ -125,8 +125,11 @@ class WarnCard(discord.ui.View):
 
 		db.commit()
 		db.close()
+		formats = [self.bot.logger.UserFormatType({"AUTHOR": self.author, "USER": self.user})]
+		emb = discord.Embed(title= "Варн", description=f"Пользователю {self.user.mention} было выдано наказание по причине:\n ```{reason}```", colour=0xff0000)
+		await self.bot.logger.log(msg= f"Пользователь AUTHOR выдал пользователю USER варн по причине: \"{reason}\"", embed= emb, formats= formats, is_punish= True, lock_discord_msg= True)
 
-	def unwarn(self):
+	async def unwarn(self):
 		if not self.choosen_warn:
 			return None
 		
@@ -134,7 +137,6 @@ class WarnCard(discord.ui.View):
 
 		if not res:
 			return None
-		
 		if res[2] <= 1:
 			cur.execute(f"DELETE FROM warn WHERE id = {self.user.id}")
 		else:
@@ -152,10 +154,14 @@ class WarnCard(discord.ui.View):
 
 		db.commit()
 		db.close()
+		reason = json.loads(res[1])[self.choosen_warn]["reason"]
+		formats = [self.bot.logger.UserFormatType({"AUTHOR": self.author, "USER": self.user})]
+		emb = discord.Embed(title= "Варн", description=f"С пользователя {self.user.mention} был снят варн с причиной: ```{reason}```", colour=0x00ff00)
+		await self.bot.logger.log(msg= f"Пользователь AUTHOR снял с пользователя USER варн с причиной \"{reason}\"", embed= emb, formats= formats, is_punish= True, lock_discord_msg= True)
 		self.choosen_warn = None
 		return True
 
-	def purge_warns(self):
+	async def purge_warns(self):
 		res, db, cur = self.get_structured_db_info()
 		if not res:
 			return None
@@ -163,6 +169,9 @@ class WarnCard(discord.ui.View):
 		cur.execute(f"DELETE FROM warn WHERE id = '{self.user.id}'")
 		db.commit()
 		db.close()
+		formats = [self.bot.logger.UserFormatType({"AUTHOR": self.author, "USER": self.user})]
+		emb = discord.Embed(title= "Варн", description=f"С пользователя {self.user.mention} были сняты все варны", colour=0x00ff00)
+		await self.bot.logger.log(msg= f"Пользователь AUTHOR снял с пользователя USER все варны", embed= emb, formats= formats, is_punish= True, lock_discord_msg= True)
 	
 	def get_structured_db_info(self):
 		db = sqlite3.connect("data.db")
@@ -183,5 +192,5 @@ class WarnGive(discord.ui.Modal):
 		self.view = view
 
 	async def callback(self, interaction: discord.Interaction):
-		self.view.warn(interaction.data['components'][0]['components'][0]['value'])
+		await self.view.warn(interaction.data['components'][0]['components'][0]['value'])
 		await interaction.response.edit_message(embed= self.view.update_embed(), view= self.view)
