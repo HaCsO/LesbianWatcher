@@ -3,6 +3,21 @@ import discord
 import json
 import datetime
 
+class WarningWindow(discord.ui.Modal):
+	def __init__(self, bot, verb, callback, *args, **kwargs):
+		super().__init__(title=f"ВЫ УВЕРЕННЫ В: {verb}?")
+		reason = discord.ui.InputText(label = "Напишите любой текст, для подтверждения", required=True, max_length=60)
+		self.add_item(reason)
+		self.bot = bot
+		self.cb = callback
+		self.cb_args = args
+		self.cb_kwargs = kwargs
+
+	async def callback(self, interaction: discord.Interaction):
+		await self.cb(*self.cb_args, **self.cb_kwargs)
+		await interaction.response.defer()
+
+
 class WarnCard(discord.ui.View):
 	def __init__(self, user, author, bot, *args, **kwargs):
 		super().__init__(*args, **kwargs)
