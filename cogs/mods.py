@@ -42,6 +42,17 @@ class Mods(commands.Cog):
 		view = WarnCard(user, ctx.author, self.bot)
 		await ctx.respond(embed= view.update_embed(), view= view)
 
+	@is_staff()
+	@commands.slash_command()
+	async def warn(self, ctx, user: discord.Member, reason= "Не указано"):
+		await warn(ctx.author, user, self.bot.logger, reason)
+		await ctx.reply("Выполнено!")
+
+	@is_staff()
+	@discord.message_command(name= "Выдать варн")
+	async def warn_msg(self, ctx, msg):
+		modal = WarnGive(self.bot, ctx.author, msg.author, msg)
+		await ctx.send_modal(modal)
 
 	@is_owner()
 	@commands.slash_command()
