@@ -76,10 +76,23 @@ class Mods(commands.Cog):
 
 	@is_staff()
 	@commands.slash_command()
-	async def warns(self, ctx, user: discord.Member):
-		view = WarnCard(user, ctx.author, self.bot)
-		await ctx.respond(embed= view.update_embed(), view= view)
+	async def warns(self, ctx, user: discord.Option(discord.Member, "Укажите пользователя", required = False)):
+		if user:
+			view = WarnCard(user, ctx.author, self.bot)
+			await ctx.respond(embed= view.update_embed(), view= view)
+			return
+		
+		db = sqlite3.connect("data.db")
+		cur = db.cursor()
+		cur.execute("SELECT * FROM warn")
+		desc = ""
+		res = cur.fetchall()
+		for us in res:
+			duser = self.bot.get_guild(self.bot.guild_id).get_member(int(us[0]))
+			desc += f"{duser.mention} - {us[2]} варнов{' - КЛОУН' if len(json.loads(us[4])) else ''} {' - МИМ' if len(json.loads(us[3])) else ''}"
 
+		emb = discord.Embed(title="Список нарушителей", description=desc, color=0xffa586)
+		await ctx.respond(embed= emb)
 	@is_staff()
 	@commands.slash_command()
 	async def warn(self, ctx, user: discord.Member, reason= "Не указано"):
