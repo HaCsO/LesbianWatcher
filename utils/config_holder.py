@@ -44,7 +44,9 @@ class ConfigHolder():
 			"punish_channel": None,
 			"owner": None,
 			"headmod": None,
-			"moders": []
+			"moders": [],
+			"mime_role": None,
+			"clown_role": None
 		}
 		self.upload_to_file()
 	

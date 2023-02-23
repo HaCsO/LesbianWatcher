@@ -10,6 +10,7 @@ class LesBot(commands.Bot):
 		super().__init__(*args, **kwargs)
 		self.config = ConfigHolder("config.json")
 		self.logger = Logger
+		self.guild_id = 564902261327921186
 
 Bot = LesBot(command_prefix="!", intents= intents, debug_guilds=[564902261327921186])
 Bot.remove_command("help")

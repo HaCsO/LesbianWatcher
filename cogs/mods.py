@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import sqlite3
 import json
 import datetime
@@ -8,6 +8,10 @@ from .gui_assets import *
 class Mods(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
+
+	@commands.Cog.listener()
+	async def on_ready(self):
+		self.un.start()
 
 	def is_moderator():
 		def predicate(ctx):
@@ -33,8 +37,42 @@ class Mods(commands.Cog):
 			return ctx.author.id in staff
 		return commands.check(predicate)
 	
+	def is_headstaff():
+		def predicate(ctx):
+			staff = [ctx.bot.config.config["headmod"], ctx.bot.config.config["owner"]]
+			return ctx.author.id in staff
+		return commands.check(predicate)
+	
 	async def throw_warning_window(self, ctx, verb, callback, *args, **kwargs):
 		await ctx.response.send_modal(WarningWindow(self.bot, verb, callback, *args, **kwargs))
+
+	@is_headstaff()
+	@commands.slash_command()
+	async def force_mime(self, ctx, user: discord.Member, reason= "Не указана"):
+		warn = Punish(ctx.author, user, self.bot)
+		await warn.mime(reason)
+		await ctx.respond("Выполнено!")
+
+	@is_headstaff()
+	@commands.slash_command()
+	async def force_clown(self, ctx, user: discord.Member, reason= "Не указана"):
+		warn = Punish(ctx.author, user, self.bot)
+		await warn.clown(reason)
+		await ctx.respond("Выполнено!")
+
+	@is_headstaff()
+	@commands.slash_command()
+	async def unmime(self, ctx, user: discord.Member):
+		warn = Punish(ctx.author, user, self.bot)
+		await warn.unmime()
+		await ctx.respond("Выполнено!")
+
+	@is_headstaff()
+	@commands.slash_command()
+	async def unclown(self, ctx, user: discord.Member):
+		warn = Punish(ctx.author, user, self.bot)
+		await warn.unclown()
+		await ctx.respond("Выполнено!")
 
 	@is_staff()
 	@commands.slash_command()
@@ -45,8 +83,9 @@ class Mods(commands.Cog):
 	@is_staff()
 	@commands.slash_command()
 	async def warn(self, ctx, user: discord.Member, reason= "Не указано"):
-		await warn(ctx.author, user, self.bot.logger, reason)
-		await ctx.reply("Выполнено!")
+		warn = Punish(ctx.author, user, self.bot)
+		await warn.warn(reason)
+		await ctx.respond("Выполнено!")
 
 	@is_staff()
 	@discord.message_command(name= "Выдать варн")
@@ -78,6 +117,31 @@ class Mods(commands.Cog):
 			await bot.logger.log(msg= f"Пользователь AUTHOR установил канал CHANNEL в качестве канала для логгирования", formats= formats)
 
 		await self.throw_warning_window(ctx, f"Назначить канал для логов", callback, ctx, channel.id, self.bot.config, self.bot)
+
+	@is_owner()
+	@commands.slash_command()
+	async def mime_role(self, ctx, role: discord.Role):
+		async def callback(ctx, id, config, bot):
+			config.config["mime_role"] = id
+			config.upload_to_file()
+			await ctx.respond(f"Роль <@&{id}> была установлен в качестве роли мима")
+			formats = [bot.logger.UserFormatType({"AUTHOR": ctx.author}), bot.logger.RoleFormatType({"ROLE": role})]
+			await bot.logger.log(msg= f"Пользователь AUTHOR установил роль ROLE в качестве роли мима", formats= formats)
+
+		await self.throw_warning_window(ctx, f"Назначить канал для логов", callback, ctx, role.id, self.bot.config, self.bot)
+
+	@is_owner()
+	@commands.slash_command()
+	async def clown_role(self, ctx, role: discord.Role):
+		async def callback(ctx, id, config, bot):
+			config.config["clown_role"] = id
+			config.upload_to_file()
+			await ctx.respond(f"Роль <@&{id}> была установлен в качестве роли клоуна")
+			formats = [bot.logger.UserFormatType({"AUTHOR": ctx.author}), bot.logger.RoleFormatType({"ROLE": role})]
+			await bot.logger.log(msg= f"Пользователь AUTHOR установил роль ROLE в качестве роли клоуна", formats= formats)
+
+		await self.throw_warning_window(ctx, f"Назначить канал для логов", callback, ctx, role.id, self.bot.config, self.bot)
+
 
 	@is_owner()
 	@commands.slash_command()
@@ -121,6 +185,43 @@ class Mods(commands.Cog):
 		callback = addmod if int(verb) else remmod
 		await self.throw_warning_window(ctx, "Изменить список модерации", callback, ctx, user.id, self.bot.config, self.bot)
 
+	@is_headstaff()
+	@commands.slash_command()
+	async def get_logs(self, ctx):
+		await ctx.respond(file= discord.File("logs.txt"))
+
+	@tasks.loop(minutes=5)
+	async def un(self):
+		db = sqlite3.connect("data.db")
+		cur = db.cursor()
+		cur.execute("SELECT * FROM warn")
+		dat = cur.fetchall()
+		checktime = datetime.datetime.now()
+		for user in dat:
+			warns = json.loads(user[1])
+			mime = json.loads(user[3])
+			clown = json.loads(user[4])
+			if len(mime):
+				if datetime.datetime.fromtimestamp(float(mime["datetime"])) + datetime.timedelta(days=7) < checktime:
+					duser = self.bot.get_guild(self.bot.guild_id).get_member(int(user[0]))
+					warncontent = Punish(self.bot.user, duser, self.bot)
+					await warncontent.unmime()
+				continue
+
+			elif len(clown):
+				if datetime.datetime.fromtimestamp(float(clown["datetime"])) + datetime.timedelta(days=7) < checktime:
+					duser = self.bot.get_guild(self.bot.guild_id).get_member(int(user[0]))
+					warncontent = Punish(self.bot.user, duser, self.bot)
+					await warncontent.unclown()
+				continue
+
+			if len(warns):
+				for warn_place, warn in warns.items():
+					if datetime.datetime.fromtimestamp(float(warn["datetime"])) + datetime.timedelta(days=7) < checktime:
+						duser = self.bot.get_guild(self.bot.guild_id).get_member(int(user[0]))
+						warncontent = Punish(self.bot.user, duser, self.bot)
+						await warncontent.unwarn(warn_place)
+
 def setup(bot):
 	bot.add_cog(Mods(bot))
-	print("Lesbian writer mods engaged!")      
+	print("Lesbian Wathcer mods engaged!")      
