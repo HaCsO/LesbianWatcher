@@ -17,7 +17,7 @@ Bot.remove_command("help")
 
 @Bot.event
 async def on_ready():
-	print("Lesbian Watcher activated!")
+	print("[Lesbian Watcher] activated!")
 	Bot.logger = Bot.logger(Bot)
 
 @Bot.event
