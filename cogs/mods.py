@@ -46,6 +46,37 @@ class Mods(commands.Cog):
 	async def throw_warning_window(self, ctx, verb, callback, *args, **kwargs):
 		await ctx.response.send_modal(WarningWindow(self.bot, verb, callback, *args, **kwargs))
 
+	async def regive_role(self, member, role):
+		formats = [self.bot.logger.UserFormatType({"USER": member})]
+		await self.bot.logger.log("Пользователь USER попытался перезайти на сервер имея активное наказание!", formats= formats)
+		if not role:
+			await self.bot.logger.log(f"{self.author.mention} Внимание, не обнаружена роль. Проверьте конфигурацию!")
+			return
+		
+		try:
+			role = self.bot.get_guild(self.bot.guild_id).get_role(role)
+		except:
+			await self.bot.logger.log(f"{self.author.mention} Внимание, не обнаружена роль. Проверьте конфигурацию!")
+			return None
+		
+		await member.add_roles(role)
+
+	@commands.Cog.listener()
+	async def on_member_join(self, member):
+		res, db, cur = get_structured_db_info(self.user)
+		db.close()
+
+		if not res:
+			return
+		
+		if json.loads(res[3]):
+			role = self.bot.config.config["mime_role"]
+			await self.regive_role(member, role)
+
+		if json.loads(res[4]):
+			role = self.bot.config.config["clown_role"]
+			await self.regive_role(member, role)
+
 	@is_headstaff()
 	@commands.slash_command()
 	async def force_mime(self, ctx, user: discord.Member, reason= "Не указана"):
