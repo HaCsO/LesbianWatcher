@@ -3,11 +3,11 @@ from discord.ext import commands, tasks
 import sqlite3
 import json
 import datetime
-from ..utils.gui_assets import *
-
+from ..utils.discord_helpers.gui_assets import *
 
 class Votes(commands.Cog):
 	def __init__(self, bot):
+
 		self.bot = bot
 
 def setup(bot):

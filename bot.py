@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
-from utils.config_holder import ConfigHolder
-from utils.logger import Logger
+from utils.extern.config_holder import ConfigHolder
+from utils.extern.logger import Logger
 
 intents = discord.Intents.all()
 

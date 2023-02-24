@@ -1,8 +1,9 @@
 import discord
 import json
 import datetime
-from .punish_verbs import *
+from ..punish.punish_verbs import *
 
+# Modals
 class WarningWindow(discord.ui.Modal):
 	def __init__(self, bot, verb, callback, *args, **kwargs):
 		super().__init__(title=f"ВЫ УВЕРЕННЫ В: {verb}?")
@@ -16,6 +17,43 @@ class WarningWindow(discord.ui.Modal):
 	async def callback(self, interaction: discord.Interaction):
 		await self.cb(*self.cb_args, **self.cb_kwargs)
 		await interaction.response.defer()
+
+class WarnGive(discord.ui.Modal):
+	def __init__(self, bot, author, user, msg= None):
+		super().__init__(title="Выдать варн")
+		reason = discord.ui.InputText(label = "Введите причину", required=True, max_length=60)
+		self.add_item(reason)
+		self.bot = bot
+		self.author = author
+		self.user = user
+		self.msg = msg
+
+	async def interact(self, interaction):
+		await interaction.response.defer()
+
+	async def callback(self, interaction: discord.Interaction):
+		user = self.user
+		author = self.author
+		warn = Punish(author, user, self.bot)
+		await warn.warn(interaction.data['components'][0]['components'][0]['value'])
+		if self.msg:
+			await self.msg.delete()
+
+		await self.interact(interaction)
+
+class WarnGiveView(WarnGive):
+	def __init__(self, bot, view):
+		super().__init__(bot, view.author, view.user)
+		self.view = view
+
+	async def interact(self, interaction):
+		await interaction.response.edit_message(embed= self.view.update_embed(), view= self.view)
+	
+
+# Views
+class VoteCreationMenu(discord.ui.View):
+	def __init__(self, bot):
+		self.bot = bot
 
 
 class WarnCard(discord.ui.View):
@@ -119,35 +157,3 @@ class WarnCard(discord.ui.View):
 			self.add_item(self.select_callback)
 		return True
 
-
-class WarnGive(discord.ui.Modal):
-	def __init__(self, bot, author, user, msg= None):
-		super().__init__(title="Выдать варн")
-		reason = discord.ui.InputText(label = "Введите причину", required=True, max_length=60)
-		self.add_item(reason)
-		self.bot = bot
-		self.author = author
-		self.user = user
-		self.msg = msg
-
-	async def interact(self, interaction):
-		await interaction.response.defer()
-
-	async def callback(self, interaction: discord.Interaction):
-		user = self.user
-		author = self.author
-		warn = Punish(author, user, self.bot)
-		await warn.warn(interaction.data['components'][0]['components'][0]['value'])
-		if self.msg:
-			await self.msg.delete()
-
-		await self.interact(interaction)
-
-class WarnGiveView(WarnGive):
-	def __init__(self, bot, view):
-		super().__init__(bot, view.author, view.user)
-		self.view = view
-
-	async def interact(self, interaction):
-		await interaction.response.edit_message(embed= self.view.update_embed(), view= self.view)
-	
