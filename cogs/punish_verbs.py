@@ -30,6 +30,12 @@ class Punish():
 				"datetime": f"{datetime.datetime.now().timestamp()}"
 			}
 			cur.execute(f"UPDATE warn SET additional = '{json.dumps(dat, ensure_ascii=False)}', warnamount = warnamount + 1 WHERE id = '{self.user.id}'")
+			db.commit()
+			db.close()
+			if int(res[2]+1) == 2 and not len(json.loads(res[3])):
+				await self.mime("2 активных варна")
+			elif int(res[2]+1) >= 4 and not len(json.loads(res[4])):
+				await self.clown("4 активных варна")
 		else:
 			dat = {}
 			dat["1"] = {
@@ -39,13 +45,10 @@ class Punish():
 			}
 			empty_json = "{}"
 			cur.execute(f"INSERT INTO warn VALUES ('{self.user.id}', '{json.dumps(dat, ensure_ascii=False)}', 1, '{empty_json}', '{empty_json}')")
-		db.commit()
-		db.close()
+			db.commit()
+			db.close()
 
-		if int(res[2]+1) == 2 and not len(json.loads(res[3])):
-			await self.mime("2 активных варна")
-		elif int(res[2]+1) >= 4 and not len(json.loads(res[4])):
-			await self.clown("4 активных варна")
+
 
 		formats = [self.bot.logger.UserFormatType({"AUTHOR": self.author, "USER": self.user})]
 		emb = discord.Embed(title= "Варн", description=f"Пользователю {self.user.mention} было выдано наказание по причине:\n ```{reason}```", colour=0x671515)
@@ -183,8 +186,11 @@ class Punish():
 		db.close()
 		await self.user.add_roles(role)
 		formats = [self.bot.logger.UserFormatType({"AUTHOR": self.author, "USER": self.user})]
-		emb = discord.Embed(title= "Мим", description=f"Пользователю {self.user.mention} был выдан клоун по причине:\n```{reason}```", colour=0x671515)
+		emb = discord.Embed(title= "Клоун", description=f"Пользователю {self.user.mention} был выдан клоун по причине:\n```{reason}```", colour=0x671515)
 		await self.bot.logger.log(msg= f"Пользователь AUTHOR выдал пользователю USER клоуна по причине '{reason}'", embed= emb, formats= formats, is_punish= True, lock_discord_msg= True)
+		if self.bot.config.config["talk_channel"]:
+			emb = discord.Embed(title="Клоун", description=f"Пользователь {self.user.mention} получил статус клоуна. Рекомендуется полная его блокировка!", color=0xff0000)
+			await self.bot.get_channel(self.bot.config.config["talk_channel"]).send(f"<@!{self.bot.config.config['headmod']}>", embed= emb)
 		return True
 
 	async def unmime(self):
@@ -242,6 +248,6 @@ class Punish():
 		db.close()
 		await self.user.remove_roles(role)
 		formats = [self.bot.logger.UserFormatType({"AUTHOR": self.author, "USER": self.user})]
-		emb = discord.Embed(title= "Мим", description=f"С пользователя {self.user.mention} был снят клоун", colour=0x0099ff)
+		emb = discord.Embed(title= "Клоун", description=f"С пользователя {self.user.mention} был снят клоун", colour=0x0099ff)
 		await self.bot.logger.log(msg= f"Пользователь AUTHOR снял с пользователя USER клоуна", embed= emb, formats= formats, is_punish= True, lock_discord_msg= True)
 		return True

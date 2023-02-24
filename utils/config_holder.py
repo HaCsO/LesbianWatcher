@@ -46,7 +46,8 @@ class ConfigHolder():
 			"headmod": None,
 			"moders": [],
 			"mime_role": None,
-			"clown_role": None
+			"clown_role": None,
+			"talk_channel": None
 		}
 		self.upload_to_file()
 	

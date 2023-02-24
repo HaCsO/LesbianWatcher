@@ -13,6 +13,14 @@ class Mods(commands.Cog):
 	async def on_ready(self):
 		self.un.start()
 
+	def is_talk_channel():
+		def predicate(ctx):
+			channel = ctx.bot.config.config["talk_channel"]
+			if not channel:
+				return True
+			return ctx.channel.id == channel
+		return commands.check(predicate)
+
 	def is_moderator():
 		def predicate(ctx):
 			mods = ctx.bot.config.config["moders"]
@@ -120,10 +128,11 @@ class Mods(commands.Cog):
 		res = cur.fetchall()
 		for us in res:
 			duser = self.bot.get_guild(self.bot.guild_id).get_member(int(us[0]))
-			desc += f"{duser.mention} - {us[2]} варнов{' - КЛОУН' if len(json.loads(us[4])) else ''} {' - МИМ' if len(json.loads(us[3])) else ''}"
+			desc += f"{duser.mention} - {us[2]} варнов{' - КЛОУН' if len(json.loads(us[4])) else ''} {' - МИМ' if len(json.loads(us[3])) else ''}\n"
 
 		emb = discord.Embed(title="Список нарушителей", description=desc, color=0xffa586)
 		await ctx.respond(embed= emb)
+
 	@is_staff()
 	@commands.slash_command()
 	async def warn(self, ctx, user: discord.Member, reason= "Не указано"):
@@ -145,9 +154,9 @@ class Mods(commands.Cog):
 			config.upload_to_file()
 			await ctx.respond(f"Пользователь <@!{id}> был установлен в качестве главного модератора")
 			formats = [bot.logger.UserFormatType({"AUTHOR": ctx.author, "USER": user})]
-			await bot.logger.log(msg= f"Пользователь AUTHOR выдал пользователю USER должность главного модератора", formats= formats)
+			await bot.logger.log(msg= "Пользователь AUTHOR выдал пользователю USER должность главного модератора", formats= formats)
 
-		await self.throw_warning_window(ctx, f"Назначить человека на ГлавМода", callback, ctx, user.id, self.bot.config, self.bot)
+		await self.throw_warning_window(ctx, "Назначить человека на ГМа", callback, ctx, user.id, self.bot.config, self.bot)
 
 	@is_owner()
 	@commands.slash_command()
@@ -158,9 +167,35 @@ class Mods(commands.Cog):
 			await ctx.respond(f"Канал <#{id}> был установлен в качестве канала для логгирования")
 			bot.logger.update_log_channel()
 			formats = [bot.logger.UserFormatType({"AUTHOR": ctx.author}), bot.logger.ChannelFormatType({"CHANNEL": channel})]
-			await bot.logger.log(msg= f"Пользователь AUTHOR установил канал CHANNEL в качестве канала для логгирования", formats= formats)
+			await bot.logger.log(msg= "Пользователь AUTHOR установил канал CHANNEL в качестве канала для логгирования", formats= formats)
 
-		await self.throw_warning_window(ctx, f"Назначить канал для логов", callback, ctx, channel.id, self.bot.config, self.bot)
+		await self.throw_warning_window(ctx, "Назначить канал для логов", callback, ctx, channel.id, self.bot.config, self.bot)
+
+	@is_owner()
+	@commands.slash_command()
+	async def punish_channel(self, ctx, channel: discord.TextChannel):
+		async def callback(ctx, id, config, bot):
+			config.config["punish_channel"] = id
+			config.upload_to_file()
+			await ctx.respond(f"Канал <#{id}> был установлен в качестве канала для логгирования наказаний")
+			bot.logger.update_punish_channel()
+			formats = [bot.logger.UserFormatType({"AUTHOR": ctx.author}), bot.logger.ChannelFormatType({"CHANNEL": channel})]
+			await bot.logger.log(msg= f"Пользователь AUTHOR установил канал CHANNEL в качестве канала для логгирования наказаний", formats= formats)
+
+		await self.throw_warning_window(ctx, f"Назначить канал для наказа", callback, ctx, channel.id, self.bot.config, self.bot)
+
+	@is_owner()
+	@commands.slash_command()
+	async def talk_channel(self, ctx, channel: discord.TextChannel):
+		async def callback(ctx, id, config, bot):
+			config.config["talk_channel"] = id
+			config.upload_to_file()
+			await ctx.respond(f"Канал <#{id}> был установлен в качестве канала для общения с ботом")
+			bot.logger.update_log_channel()
+			formats = [bot.logger.UserFormatType({"AUTHOR": ctx.author}), bot.logger.ChannelFormatType({"CHANNEL": channel})]
+			await bot.logger.log(msg= f"Пользователь AUTHOR установил канал CHANNEL в качестве канала для общения с ботом", formats= formats)
+
+		await self.throw_warning_window(ctx, f"Назначить канал для общения", callback, ctx, channel.id, self.bot.config, self.bot)
 
 	@is_owner()
 	@commands.slash_command()
@@ -185,21 +220,6 @@ class Mods(commands.Cog):
 			await bot.logger.log(msg= f"Пользователь AUTHOR установил роль ROLE в качестве роли клоуна", formats= formats)
 
 		await self.throw_warning_window(ctx, f"Назначить канал для логов", callback, ctx, role.id, self.bot.config, self.bot)
-
-
-	@is_owner()
-	@commands.slash_command()
-	async def punish_channel(self, ctx, channel: discord.TextChannel):
-		async def callback(ctx, id, config, bot):
-			config.config["punish_channel"] = id
-			config.upload_to_file()
-			await ctx.respond(f"Канал <#{id}> был установлен в качестве канала для логгирования наказаний")
-			bot.logger.update_punish_channel()
-			formats = [bot.logger.UserFormatType({"AUTHOR": ctx.author}), bot.logger.ChannelFormatType({"CHANNEL": channel})]
-			await bot.logger.log(msg= f"Пользователь AUTHOR установил канал CHANNEL в качестве канала для логгирования наказаний", formats= formats)
-
-		await self.throw_warning_window(ctx, f"Назначить канал для наказа", callback, ctx, channel.id, self.bot.config, self.bot)
-
 
 	@is_owner()
 	@commands.slash_command()
@@ -229,6 +249,7 @@ class Mods(commands.Cog):
 		callback = addmod if int(verb) else remmod
 		await self.throw_warning_window(ctx, "Изменить список модерации", callback, ctx, user.id, self.bot.config, self.bot)
 
+	@is_talk_channel()
 	@is_headstaff()
 	@commands.slash_command()
 	async def get_logs(self, ctx):
