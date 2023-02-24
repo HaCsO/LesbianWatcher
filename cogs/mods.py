@@ -3,8 +3,11 @@ from discord.ext import commands, tasks
 import sqlite3
 import json
 import datetime
-from ..utils.discord_helpers.gui_assets import *
-from ..utils.discord_helpers.access import *
+import sys
+import os
+sys.path.append(os.path.abspath("../utils"))
+from utils.discord_helpers.gui_assets import *
+from utils.discord_helpers.access import *
 
 class Mods(commands.Cog):
 	def __init__(self, bot):
