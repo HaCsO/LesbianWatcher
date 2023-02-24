@@ -2,7 +2,6 @@ import discord
 import json
 import datetime
 import sys
-sys.path.append(".")
 from ..punish.punish_verbs import *
 
 # Modals
