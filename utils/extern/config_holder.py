@@ -1,53 +1,73 @@
-import json
+import tomli
+import tomli_w
 import datetime
 
 class ConfigHolder():
-	def __init__(self, config_path):
-		self.config = {}
-		self.lastupdate = None
-		self.path = config_path
-		self.validate_config()
-		self.update_from_file()
+    _config: dict = {}
+    bot: dict = {}
+    users: dict = {}
+    roles: dict = {}
+    channels: dict = {}
+    
+    def __init__(self, config_path):
+        self.path: str = config_path
+        self.lastupdate: datetime = None
+        self.validate_config()
+        self.update_from_file()
+    
+    def validate_config(self):
+        try:
+            open(self.path, "rb")
+        except:
+            self.create_config()
+    
+    def sync_config(self):
+        self._config["bot"] = self.bot
+        self._config["users"] = self.users
+        self._config["roles"] = self.roles
+        self._config["channels"] = self.channels
+    
+    def update_from_file(self):
+        with open(self.path, "rb") as f:
+            try:
+                self._config = tomli.load(f)
+                self.bot = self._config["bot"]
+                self.users = self._config["users"]
+                self.roles = self._config["roles"]
+                self.channels = self._config["channels"]
+            except tomli.TOMLDecodeError as e:
+                print(f"Can't decode {f.name}: {e}")
 
-	def validate_config(self):
-		try:
-			open(self.path, "r")
-		except:
-			self.reset_config()			
-
-	def update_from_file(self):
-		with open(self.path, "r") as f:
-			try:
-				self.config = json.load(f)
-			except Exception as e:
-				print("Error was occured while updating from file, now we reset config and make copy of error config")
-				print(e)
-				with open("errorconfig.json", "w") as ef:
-					ef.write(f.read())
-
-				self.reset_config()
-
-
-		print("Config was updated")
-		self.lastupdate = datetime.datetime.now()
-
-	def upload_to_file(self):
-		with open(self.path, "w") as f:
-			json.dump(self.config, f)
-
-		print("Config was updated")
-		self.lastupdate = datetime.datetime.now()
-
-	def reset_config(self):
-		self.config = {
-			"log_channel": None,
-			"punish_channel": None,
-			"owner": None,
-			"headmod": None,
-			"moders": [],
-			"mime_role": None,
-			"clown_role": None,
-			"talk_channel": None
-		}
-		self.upload_to_file()
-	
+        print("Config was updated from a file.")
+        self.lastupdate = datetime.datetime.now()
+    
+    def upload_to_file(self):
+        with open(self.path, "wb") as f:
+            self.sync_config()
+            tomli_w.dump(self._config, f)
+            
+        print("Config file was updated.")
+        self.lastupdate = datetime.datetime.now()
+    
+    def create_config(self):
+        bot: dict = {
+            "token": "",
+            "guild_id": 0,
+            "debug_guilds": []
+        }
+        users: dict = {
+            "owner": 0,
+            "headmod": 0,
+            "mods": []
+        }
+        roles: dict = {
+            "mime": 0,
+            "clown": 0
+        }
+        channels: dict = {
+            "log": 0,
+            "talk": 0,
+            "punish":0
+        }
+        self._config = {"bot": bot, "users": users, "roles": roles, "channels": channels}
+        self.upload_to_file()

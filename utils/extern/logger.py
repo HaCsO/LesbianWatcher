@@ -10,7 +10,7 @@ class Logger():
 		self.update_punish_channel()
 
 	def update_log_channel(self):
-		channel = self.bot.config.config["log_channel"]
+		channel = self.bot.config.channels["log"]
 		if not channel:
 			print("Config havent a log channel id, so logs will went in console")
 			return 
@@ -22,7 +22,7 @@ class Logger():
 			self.log_channel = None
 
 	def update_punish_channel(self):
-		channel = self.bot.config.config["punish_channel"]
+		channel = self.bot.config.channels["punish"]
 		if not channel:
 			print("Config havent a log channel id, so logs will went in console")
 			return 
