@@ -28,8 +28,8 @@ class ConfigHolder():
                 self._config: dict = tomli.load(f)
                 self.bot: dict = self._config["bot"]
                 self.users: dict = self._config["users"]
-                self.channels: dict = self._config["channels"]
                 self.roles: dict = self._config["roles"]
+                self.channels: dict = self._config["channels"]
             except tomli.TOMLDecodeError as e:
                 print(f"Can't decode {f.name}: {e}")
 
