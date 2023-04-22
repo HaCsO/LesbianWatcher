@@ -3,8 +3,13 @@ import tomli_w
 import datetime
 
 class ConfigHolder():
+    _config: dict = {}
+    bot: dict = {}
+    users: dict = {}
+    roles: dict = {}
+    channels: dict = {}
+    
     def __init__(self, config_path):
-        self._config: dict = {}
         self.path: str = config_path
         self.lastupdate: datetime = None
         self.validate_config()
@@ -25,11 +30,11 @@ class ConfigHolder():
     def update_from_file(self):
         with open(self.path, "rb") as f:
             try:
-                self._config: dict = tomli.load(f)
-                self.bot: dict = self._config["bot"]
-                self.users: dict = self._config["users"]
-                self.roles: dict = self._config["roles"]
-                self.channels: dict = self._config["channels"]
+                self._config = tomli.load(f)
+                self.bot = self._config["bot"]
+                self.users = self._config["users"]
+                self.roles = self._config["roles"]
+                self.channels = self._config["channels"]
             except tomli.TOMLDecodeError as e:
                 print(f"Can't decode {f.name}: {e}")
 
