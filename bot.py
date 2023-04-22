@@ -2,24 +2,30 @@ import discord
 from discord.ext import commands
 from utils.extern.config_holder import ConfigHolder
 from utils.extern.logger import Logger
+from utils.database import DBHolder
 
 intents = discord.Intents.all()
 
 class LesBot(commands.Bot):
+	loginit = False
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
+		super().remove_command("help")
+		self.debug_guilds = self.config.bot["debug_guilds"]
+
 		self.config = ConfigHolder("config.toml")
 		self.logger = Logger
 		self.guild_id = self.config.bot["guild_id"]
-		self.debug_guilds = self.config.bot["debug_guilds"]
+		self.dbholder = DBHolder("data.db")
 
 Bot = LesBot(command_prefix="!", intents= intents)
-Bot.remove_command("help")
 
 @Bot.event
 async def on_ready():
 	print("[Lesbian Watcher] activated!")
-	Bot.logger = Bot.logger(Bot)
+	if not Bot.loginit:
+		Bot.logger = Bot.logger(Bot)
+		Bot.loginit = True
 
 @Bot.event
 async def on_application_command_error(ctx, err):

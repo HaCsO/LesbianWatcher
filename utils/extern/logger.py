@@ -1,5 +1,7 @@
 import datetime
-
+import tomli
+import tomli_w
+				
 class Logger():
 	def __init__(self, bot):
 		self.bot = bot
@@ -8,6 +10,11 @@ class Logger():
 		self.guild_id = 564902261327921186
 		self.update_log_channel()
 		self.update_punish_channel()
+		self.localisation = {
+			"ru": DefaulLogMsgs("ru", "localisation/ru.toml"),
+			"en": DefaulLogMsgs("en", "localisation/eng.toml")
+		}
+		self.choosen_localise = "ru"
 
 	def update_log_channel(self):
 		channel = self.bot.config.channels["log"]
@@ -52,6 +59,12 @@ class Logger():
 
 		with open("logs.txt", "a", encoding="UTF8") as log_file:
 			log_file.write(f"[{datetime.datetime.now()}] " + console_msg + "\n")
+
+	async def log_localised(self, name, formats=list()):
+		assert name in self.localisation[self.choosen_localise].locals
+		message = self.localisation[self.choosen_localise].locals[name]
+		await self.log(message["value"], formats=formats, is_punish=message["punish"], lock_discord_msg=message["dislock"])
+		
 
 	class BaseFormat:
 		def discord_format(self, msg):
@@ -168,4 +181,17 @@ class Logger():
 				msg_for_discord = msg_for_discord.replace(k, v)
 
 			return msg_for_discord, msg_for_console
-					
+
+class DefaulLogMsgs():
+	def __init__(self, localisation, file):
+		self.locname = localisation
+		self.file = file
+		self.locals = {}
+		self.__parse()
+
+	def __parse(self):
+		with open(self.file, "rb") as f:
+			data = tomli.load(f)
+			info = data["main"]
+			for name, value in info.items():
+				self.locals[name] = {"value": value[0], "punish": bool(value[1]), "dislock": bool(value[2])}
