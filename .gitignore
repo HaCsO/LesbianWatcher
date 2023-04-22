@@ -1,0 +1,12 @@
+# workspace directories
+.vscode
+.idea
+
+# files
+data.db
+logs.txt
+config.toml
+
+# python binaries, venv
+venv
+__pycache__

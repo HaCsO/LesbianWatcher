@@ -8,11 +8,12 @@ intents = discord.Intents.all()
 class LesBot(commands.Bot):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		self.config = ConfigHolder("config.json")
+		self.config = ConfigHolder("config.toml")
 		self.logger = Logger
-		self.guild_id = 564902261327921186
+		self.guild_id = self.config.bot["guild_id"]
+		self.debug_guilds = self.config.bot["debug_guilds"]
 
-Bot = LesBot(command_prefix="!", intents= intents, debug_guilds=[564902261327921186])
+Bot = LesBot(command_prefix="!", intents= intents)
 Bot.remove_command("help")
 
 @Bot.event
@@ -47,6 +48,6 @@ cogs = [
 for i in cogs:
 	Bot.load_extension(i)
 
-Bot.run("MTA3NzEyNDA2MzE0MDUxOTk4Ng.G76xDY.eUIyAjE6VHqg14ILS1y6gGWywC1QK4m311wRwg")
+Bot.run(Bot.config.bot["token"])
 	
 

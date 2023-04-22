@@ -44,11 +44,11 @@ class Mods(commands.Cog):
 			return
 		
 		if json.loads(res[3]):
-			role = self.bot.config.config["mime_role"]
+			role = self.bot.config.roles["mime"]
 			await self.regive_role(member, role)
 
 		if json.loads(res[4]):
-			role = self.bot.config.config["clown_role"]
+			role = self.bot.config.roles["clowne"]
 			await self.regive_role(member, role)
 
 	@is_headstaff()
@@ -116,7 +116,7 @@ class Mods(commands.Cog):
 	@commands.slash_command()
 	async def head(self, ctx, user: discord.Member):
 		async def callback(ctx, id, config, bot):
-			config.config["headmod"] = id
+			config.users["headmod"] = id
 			config.upload_to_file()
 			await ctx.respond(f"Пользователь <@!{id}> был установлен в качестве главного модератора")
 			formats = [bot.logger.UserFormatType({"AUTHOR": ctx.author, "USER": user})]
@@ -128,7 +128,7 @@ class Mods(commands.Cog):
 	@commands.slash_command()
 	async def log_channel(self, ctx, channel: discord.TextChannel):
 		async def callback(ctx, id, config, bot):
-			config.config["log_channel"] = id
+			config.channels["log"] = id
 			config.upload_to_file()
 			await ctx.respond(f"Канал <#{id}> был установлен в качестве канала для логгирования")
 			bot.logger.update_log_channel()
@@ -141,7 +141,7 @@ class Mods(commands.Cog):
 	@commands.slash_command()
 	async def punish_channel(self, ctx, channel: discord.TextChannel):
 		async def callback(ctx, id, config, bot):
-			config.config["punish_channel"] = id
+			config.channels["punish"] = id
 			config.upload_to_file()
 			await ctx.respond(f"Канал <#{id}> был установлен в качестве канала для логгирования наказаний")
 			bot.logger.update_punish_channel()
@@ -154,7 +154,7 @@ class Mods(commands.Cog):
 	@commands.slash_command()
 	async def talk_channel(self, ctx, channel: discord.TextChannel):
 		async def callback(ctx, id, config, bot):
-			config.config["talk_channel"] = id
+			config.channels["talk"] = id
 			config.upload_to_file()
 			await ctx.respond(f"Канал <#{id}> был установлен в качестве канала для общения с ботом")
 			bot.logger.update_log_channel()
@@ -167,7 +167,7 @@ class Mods(commands.Cog):
 	@commands.slash_command()
 	async def mime_role(self, ctx, role: discord.Role):
 		async def callback(ctx, id, config, bot):
-			config.config["mime_role"] = id
+			config.roles["mime"] = id
 			config.upload_to_file()
 			await ctx.respond(f"Роль <@&{id}> была установлен в качестве роли мима")
 			formats = [bot.logger.UserFormatType({"AUTHOR": ctx.author}), bot.logger.RoleFormatType({"ROLE": role})]
@@ -179,7 +179,7 @@ class Mods(commands.Cog):
 	@commands.slash_command()
 	async def clown_role(self, ctx, role: discord.Role):
 		async def callback(ctx, id, config, bot):
-			config.config["clown_role"] = id
+			config.roles["clown"] = id
 			config.upload_to_file()
 			await ctx.respond(f"Роль <@&{id}> была установлен в качестве роли клоуна")
 			formats = [bot.logger.UserFormatType({"AUTHOR": ctx.author}), bot.logger.RoleFormatType({"ROLE": role})]
@@ -191,11 +191,11 @@ class Mods(commands.Cog):
 	@commands.slash_command()
 	async def moderator(self, ctx, verb: discord.Option(name="тип", choices=[discord.OptionChoice(name="Добавить", value="1"),discord.OptionChoice(name="Убрать", value="0")], required= True), user: discord.Member):
 		async def addmod(ctx, id, config, bot):
-			if id in config.config["moders"]:
+			if id in config.users["mods"]:
 				await ctx.respond(f"Пользователь <@!{id}> уже в список модераторов")
 				return
 			
-			config.config["moders"].append(id)
+			config.users["mods"].append(id)
 			config.upload_to_file()
 			await ctx.respond(f"Пользователь <@!{id}> был добавлен в список модераторов")
 			formats = [bot.logger.UserFormatType({"AUTHOR": ctx.author, "USER": user})]
@@ -203,7 +203,7 @@ class Mods(commands.Cog):
 
 		async def remmod(ctx, id, config, bot):
 			try:
-				config.config["moders"].remove(id)
+				config.users["mods"].remove(id)
 			except:
 				await ctx.respond(f"Пользователь <@!{id}> не обнаружен в списке модераторов")
 				return

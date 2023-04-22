@@ -103,7 +103,7 @@ class Punish():
 		await self.bot.logger.log(msg= f"Пользователь AUTHOR снял с пользователя USER все варны", embed= emb, formats= formats, is_punish= True, lock_discord_msg= True)
 
 	async def mime(self, reason):
-		role_id = self.bot.config.config["mime_role"]
+		role_id = self.bot.config.roles["mime"]
 		if not role_id:
 			await self.bot.logger.log(f"{self.author.mention} Внимание, не обнаружена роль мима. Проверьте конфигурацию!")
 			return None
@@ -147,7 +147,7 @@ class Punish():
 		return True
 
 	async def clown(self, reason):
-		role_id = self.bot.config.config["clown_role"]
+		role_id = self.bot.config.roles["clown"]
 		if not role_id:
 			await self.bot.logger.log(f"{self.author.mention} Внимание, не обнаружена роль клоуна. Проверьте конфигурацию!")
 			return None
@@ -188,13 +188,13 @@ class Punish():
 		formats = [self.bot.logger.UserFormatType({"AUTHOR": self.author, "USER": self.user})]
 		emb = discord.Embed(title= "Клоун", description=f"Пользователю {self.user.mention} был выдан клоун по причине:\n```{reason}```", colour=0x671515)
 		await self.bot.logger.log(msg= f"Пользователь AUTHOR выдал пользователю USER клоуна по причине '{reason}'", embed= emb, formats= formats, is_punish= True, lock_discord_msg= True)
-		if self.bot.config.config["talk_channel"]:
+		if self.bot.config.channels["talk"]:
 			emb = discord.Embed(title="Клоун", description=f"Пользователь {self.user.mention} получил статус клоуна. Рекомендуется полная его блокировка!", color=0xff0000)
-			await self.bot.get_channel(self.bot.config.config["talk_channel"]).send(f"<@!{self.bot.config.config['headmod']}>", embed= emb)
+			await self.bot.get_channel(self.bot.config.channels["talk"]).send(f"<@!{self.bot.config.users['headmod']}>", embed= emb)
 		return True
 
 	async def unmime(self):
-		role_id = self.bot.config.config["mime_role"]
+		role_id = self.bot.config.roles["mime"]
 		if not role_id:
 			await self.bot.logger.log(f"{self.author.mention} Внимание, не обнаружена роль мима. Проверьте конфигурацию!")
 			return None
@@ -224,7 +224,7 @@ class Punish():
 
 
 	async def unclown(self):
-		role_id = self.bot.config.config["clown_role"]
+		role_id = self.bot.config.roles["clown"]
 		if not role_id:
 			await self.bot.logger.log(f"{self.author.mention} Внимание, не обнаружена роль мима. Проверьте конфигурацию!")
 			return None
