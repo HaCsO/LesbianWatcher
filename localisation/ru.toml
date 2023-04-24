@@ -1,0 +1,39 @@
+[main]
+# name = ["message to print", "must be in separated channel for punishment messages", "must suppres text output for discord"]
+reenter = ["Пользователь USER попытался перезайти на сервер имея активное наказание", "0", "0"]
+
+set_headmod = ["Пользователь AUTHOR выдал пользователю USER должность главного модератора", "0", "0"]
+add_mod = ["Пользователь AUTHOR добавил пользователя USER в список модерации", "0", "0"]
+rem_mod = ["Пользователь AUTHOR удалил пользователя USER из списока модерации", "0", "0"]
+
+set_log_channel = ["Пользователь AUTHOR установил канал CHANNEL в качестве канала для логгирования", "0", "0"]
+set_punish_channel = ["Пользователь AUTHOR установил канал CHANNEL в качестве канала для логгирования наказаний", "0", "0"]
+set_talk_channel = ["Пользователь AUTHOR установил канал CHANNEL в качестве канала для общения с ботом", "0", "0"]
+
+set_mime_role = ["Пользователь AUTHOR установил роль ROLE в качестве роли мима", "0", "0"]
+set_clown_role = ["Пользователь AUTHOR установил роль ROLE в качестве роли клоуна", "0", "0"]
+
+role_not_found = ["Внимание, не обнаружена роль. Проверьте конфигурацию!", "0", "0"]
+
+warn = ["Пользователь AUTHOR выдал пользователю USER варн по причине: \"REASON\"", "1", "1"]
+unwarn = ["Пользователь AUTHOR снял с пользователя USER варн с причиной \"REASON\"", "1", "1"]
+purgewarns = ["Пользователь AUTHOR снял с пользователя USER все варны", "1", "1"]
+
+give_mime = ["Пользователь AUTHOR выдал пользователю USER мима по причине \"REASON\"", "1", "1"]
+give_clown = ["Пользователь AUTHOR выдал пользователю USER клоуна по причине \"REASON\"", "1", "1"]
+
+unmime = ["Пользователь AUTHOR снял с пользователя USER мима", "1", "1"]
+unclown = ["Пользователь AUTHOR снял с пользователя USER клоуна", "1", "1"]
+
+[embeds]
+# name = """{"title": "Name", "description": "My name is NAME", "color": "#FFFFFF", "dependences": ["NAME"]}"""
+# name must be same with name from main, they will link together
+warn = """{"title": "Варн","description": "Пользователю USER было выдано наказание по причине:\n ``` REASON ```","color": "#671515","dependences": ["USER","REASON"]}"""
+unwarn = """{"title": "Варн","description": "С пользователя USER был снят варн с причиной:\n ``` REASON ```","color": "#0099ff","dependences": ["USER","REASON"]}"""
+purgewarns = """{"title": "Варн","description": "С пользователя USER были сняты все варны","color": "#0099ff","dependences": ["USER"]}"""
+
+give_mime = """{"title": "Мим", "description": "Пользователю USER был выдан мим по причине:\n``` REASON ```", "color": "#671515", "dependences": ["USER","REASON"]}"""
+give_clown = """{"title": "Клоун", "description": "Пользователю USER был выдан клоун по причине:\n``` REASON ```", "color": "#671515", "dependences": ["USER","REASON"]}"""
+
+unmime = """{"title": "Мим", "description": "С пользователя USER был снят мим", "color": "#0099ff", "dependences": ["USER"]}"""
+unclown = """{"title": "Клоун", "description": "С пользователя USER был снят клоун", "color": "#0099ff", "dependences": ["USER"]}"""
