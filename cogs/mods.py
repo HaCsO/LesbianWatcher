@@ -32,7 +32,7 @@ class Mods(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_member_join(self, member):
-		with self.bot.dbhandler.interact() as cur:
+		with self.bot.dbholder.interact() as cur:
 			res = cur.get_structured_db_info(self.user)
 			if not res:
 				return
@@ -84,28 +84,28 @@ class Mods(commands.Cog):
 	async def force_mime(self, ctx, user: discord.Member, reason= "Не указана"):
 		warn = Punish(ctx.author, user, self.bot)
 		await warn.mime(reason)
-		await ctx.respond(f"Модератор {ctx.author.mention} выдал роль мима пользователю {user}.")
+		await ctx.respond(f"Модератор {ctx.author.mention} выдал роль мима пользователю {user.mention}.")
 
 	@is_headstaff()
 	@commands.slash_command()
 	async def force_clown(self, ctx, user: discord.Member, reason= "Не указана"):
 		warn = Punish(ctx.author, user, self.bot)
 		await warn.clown(reason)
-		await ctx.respond(f"Модератор {ctx.author.mention} выдал роль клоуна пользователю {user}.")
+		await ctx.respond(f"Модератор {ctx.author.mention} выдал роль клоуна пользователю {user.mention}.")
 
 	@is_headstaff()
 	@commands.slash_command()
 	async def unmime(self, ctx, user: discord.Member):
 		warn = Punish(ctx.author, user, self.bot)
 		await warn.unmime()
-		await ctx.respond(f"Модератор {ctx.author.mention} снял роль мима с пользователя {user}.")
+		await ctx.respond(f"Модератор {ctx.author.mention} снял роль мима с пользователя {user.mention}.")
 
 	@is_headstaff()
 	@commands.slash_command()
 	async def unclown(self, ctx, user: discord.Member):
 		warn = Punish(ctx.author, user, self.bot)
 		await warn.unclown()
-		await ctx.respond(f"Модератор {ctx.author.mention} выдал роль клоуна с пользователя {user}.")
+		await ctx.respond(f"Модератор {ctx.author.mention} выдал роль клоуна с пользователя {user.mention}.")
 
 
 	@is_staff()
@@ -117,7 +117,7 @@ class Mods(commands.Cog):
 			return
 		
 		desc = ""
-		with self.bot.dbhandler.interact() as cur:
+		with self.bot.dbholder.interact() as cur:
 			cur.execute("SELECT * FROM warn")
 			res = cur.fetchall()
 			for us in res:
@@ -250,6 +250,33 @@ class Mods(commands.Cog):
 	@commands.slash_command()
 	async def get_logs(self, ctx):
 		await ctx.respond(file= discord.File("logs.txt"))
+
+	@is_talk_channel()
+	@is_headstaff()
+	@commands.slash_command()
+	async def view_config(self, ctx):
+		desc = "**[USERS]**\n"
+		for k, v in self.bot.config.users.items():
+			desc += f"{k}: "
+			if isinstance(v, list):
+				for i in v:
+					desc += f"<@!{i}>, "
+				desc += "\n"
+			else:
+				desc += f"<@!{v}>\n"
+
+		desc += "\n**[ROLES]**\n"
+		for k, v in self.bot.config.roles.items():
+			desc += f"{k}: <@&{v}>\n"
+
+		desc += "\n**[CHANNELS]**\n"
+		for k, v in self.bot.config.channels.items():
+			desc += f"{k}: <#{v}>\n"
+		
+
+		emb = discord.Embed(title="Просмотр данных о текущей конфигурации.", description=desc, color=0x0099ff)
+		emb.set_footer(text="Поля оглавления bot не указаны, так как это не безопасно.")
+		await ctx.respond(embed= emb)
 
 def setup(bot):
 	bot.add_cog(Mods(bot))

@@ -110,8 +110,8 @@ class WarnCard(discord.ui.View):
 
 
 	def update_embed(self):
-		res, db, cur = get_structured_db_info(self.user)
-		db.close()
+		with self.bot.dbholder.interact() as cur:
+			res = cur.get_structured_db_info(self.user)
 		warnlist = None
 		if res:
 			warnlist = ""
@@ -140,8 +140,8 @@ class WarnCard(discord.ui.View):
 
 	def update_view_options(self, warns= None):
 		if not warns:
-			res, db, cur = get_structured_db_info(self.user)
-			db.close()
+			with self.bot.dbholder.interact() as cur:
+				res = cur.get_structured_db_info(self.user)
 			if not res:
 				self.remove_item(self.select_callback)
 				return

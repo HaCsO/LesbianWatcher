@@ -21,7 +21,7 @@ class DBHolder:
 		if not self.path:
 			return False
 		try:
-			self.connect = sqlite3(self.path) 
+			self.connect = sqlite3.connect(self.path) 
 		except:
 			return False
 		return True
@@ -29,8 +29,7 @@ class DBHolder:
 	@contextlib.contextmanager
 	def interact(self):
 		assert self.connect is not None
-		cur = self.connect.cursor()
-		cur.__class__ = LesCursor
+		cur = LesCursor(self.connect.cursor().connection) 
 		try:
 			yield cur
 		finally:

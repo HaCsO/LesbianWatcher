@@ -1,2 +1,4 @@
 [main]
 # name = ["message to print", "must be in separated channel for punishment messages", "must suppres output for discord"]
+[embeds]
+# name = """{"title": "Name", "description": "My name is NAME", "color": "#FFFFFF", "dependences": ["NAME"]}"""
