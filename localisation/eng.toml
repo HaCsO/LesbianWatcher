@@ -1,4 +1,39 @@
 [main]
-# name = ["message to print", "must be in separated channel for punishment messages", "must suppres output for discord"]
+# name = ["message to print", "must be in separated channel for punishment messages", "must suppres text output for discord"]
+reenter = ["User USER attempted to rejoin the server while having an active punishment", "0", "0"]
+
+set_headmod = ["User AUTHOR assigned user USER the Head Moderator role", "0", "0"]
+add_mod = ["User AUTHOR added user USER to the moderation list", "0", "0"]
+rem_mod = ["User AUTHOR removed user USER from the moderation list", "0", "0"]
+
+set_log_channel = ["User AUTHOR set CHANNEL as the logging channel", "0", "0"]
+set_punish_channel = ["User AUTHOR set CHANNEL as the punishment logging channel", "0", "0"]
+set_talk_channel = ["User AUTHOR set CHANNEL as the channel for bot communication", "0", "0"]
+
+set_mime_role = ["User AUTHOR set ROLE as the Mime role", "0", "0"]
+set_clown_role = ["User AUTHOR set ROLE as the Clown role", "0", "0"]
+
+role_not_found = ["Attention, role not found. Check the configuration!", "0", "0"]
+
+warn = ["User AUTHOR gave user USER a warning for reason: \"REASON\"", "1", "1"]
+unwarn = ["User AUTHOR removed a warning from user USER with reason: \"REASON\"", "1", "1"]
+purgewarns = ["User AUTHOR removed all warnings from user USER", "1", "1"]
+
+give_mime = ["User AUTHOR assigned user USER the Mime role for reason: \"REASON\"", "1", "1"]
+give_clown = ["User AUTHOR assigned user USER the Clown role for reason: \"REASON\"", "1", "1"]
+
+unmime = ["User AUTHOR removed the Mime role from user USER", "1", "1"]
+unclown = ["User AUTHOR removed the Clown role from user USER", "1", "1"]
+
 [embeds]
 # name = """{"title": "Name", "description": "My name is NAME", "color": "#FFFFFF", "dependences": ["NAME"]}"""
+# name must be same with name from main, they will link together
+warn = """{"title": "Warn","description": "The user USER was punished for the reason:\n ``` REASON ```","color": "#671515","dependences": ["USER","REASON"]}"""
+unwarn = """{"title": "Warn","description": "The warn was removed from the user USER with the reason:\n ``` REASON ```","color": "#0099ff","dependences": ["USER","REASON"]}"""
+purgewarns = """{"title": "Warn","description": "All warns were removed from the user USER","color": "#0099ff","dependences": ["USER"]}"""
+
+give_mime = """{"title": "Mime", "description": "The user USER was given a mime for the reason:\n``` REASON ```", "color": "#671515", "dependences": ["USER","REASON"]}"""
+give_clown = """{"title": "Clown", "description": "The user USER was given a clown for the reason:\n``` REASON ```", "color": "#671515", "dependences": ["USER","REASON"]}"""
+
+unmime = """{"title": "Mime", "description": "The mime was removed from the user USER", "color": "#0099ff", "dependences": ["USER"]}"""
+unclown = """{"title": "Clown", "description": "The clown was removed from the user USER", "color": "#0099ff", "dependences": ["USER"]}"""
