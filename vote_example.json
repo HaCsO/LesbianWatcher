@@ -1,0 +1,14 @@
+{
+    "name": "Simple vote",
+    "desc": "Just a vote for test",
+    "options": {
+        "1️⃣": "Option 1",
+        "2️⃣": "Option 2"
+    },
+    "whitelist": {
+        "576830567253934090": 5,
+        "1078257313233772564": 2,
+        "everyone": 1
+    },
+    "endtime": 1685057471.494042
+}
