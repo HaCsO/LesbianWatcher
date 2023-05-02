@@ -1,20 +1,7 @@
 import json
 import datetime
 import discord
-
-emoji_list = [
-	"0️⃣",
-	"1️⃣",
-	"2️⃣",
-	"3️⃣",
-	"4️⃣",
-	"5️⃣",
-	"6️⃣",
-	"7️⃣",
-	"8️⃣",
-	"9️⃣",
-	"🔟"
-]
+import emoji
 
 class Vote:
 	message_id = None
@@ -41,10 +28,11 @@ class Vote:
 		obj = json.loads(string)
 		self.name = obj.get("name")
 		self.desc = obj.get("desc")
+		# self.options = obj.get("options")
 		raw_options = obj.get("options")
 		self.options = {}
 		for k, v in raw_options.items():
-			self.options[k.encode("utf-8")] = v
+			self.options[emoji.EMOJI_DATA[k]["alias"][0]] = v
 		self.whitelist = obj.get("whitelist")				
 		self.endtime = datetime.datetime.fromtimestamp(obj.get("endtime"))
 
@@ -53,10 +41,13 @@ class Vote:
 			return
 		emb = discord.Embed(title=self.name, description=self.desc, color=0xFF7F50)
 		for k, v in self.options.items():
-			emb.add_field(name=k.decode("utf-8"), value=v)
+			emb.add_field(name=emoji.emojize(k, language="alias"), value=v)
 
 		emb.timestamp = self.endtime
-		self.message_id = (await self.bot.get_guild(self.bot.config.bot["guild_id"]).get_channel(self.bot.config.channels["vote"]).send(embed=emb)).id
+		msg = await self.bot.get_guild(self.bot.config.bot["guild_id"]).get_channel(self.bot.config.channels["vote"]).send(embed=emb)
+		self.message_id = msg.id
+		for k in self.options.keys():
+			await msg.add_reaction(emoji.emojize(k, language="alias"))
 
 	async def result(self, msg):
 		if not self.message_id:
@@ -104,6 +95,6 @@ class Vote:
 			data = cur.fetchone()
 			if data:
 				return False
-			ГИГАСТРОКА = f"INSERT INTO vote VALUES ('{self.message_id}', '{self.name}', '{self.desc}', '{self.author}', '{self.options}', '{self.whitelist}', '{self.endtime}')"
+			ГИГАСТРОКА = f'INSERT INTO vote VALUES ("{self.message_id}", "{self.name}", "{self.desc}", "{self.author}", "{self.options}", "{self.whitelist}", "{self.endtime}")'
 			cur.execute(ГИГАСТРОКА)
 		return True

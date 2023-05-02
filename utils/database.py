@@ -22,6 +22,7 @@ class DBHolder:
 			return False
 		try:
 			self.connect = sqlite3.connect(self.path) 
+			self.connect.text_factory = bytes
 		except:
 			return False
 		return True
