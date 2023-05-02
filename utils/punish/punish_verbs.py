@@ -11,7 +11,7 @@ class Punish():
 
 	async def warn(self, reason= "Не указана"):
 		with self.bot.dbholder.interact() as cur:
-			res = cur.get_structured_db_info(self.user)
+			res = cur.get_structured_db_info_for_warn(self.user)
 			if res:
 				dat = res[1]
 				dat = json.loads(dat)
@@ -43,7 +43,7 @@ class Punish():
 			return None
 		
 		with self.bot.dbholder.interact() as cur:
-			res = cur.get_structured_db_info(self.user)
+			res = cur.get_structured_db_info_for_warn(self.user)
 
 			if not res:
 				return None
@@ -70,7 +70,7 @@ class Punish():
 	
 	async def purge_warns(self):
 		with self.bot.dbholder.interact() as cur:
-			res = cur.get_structured_db_info(self.user)
+			res = cur.get_structured_db_info_for_warn(self.user)
 			if not res:
 				return None
 			
@@ -92,7 +92,7 @@ class Punish():
 			return None
 
 		with self.bot.dbholder.interact() as cur:
-			res = cur.get_structured_db_info(self.user)
+			res = cur.get_structured_db_info_for_warn(self.user)
 			if not res:
 				dat = {}
 				dat = {
@@ -133,7 +133,7 @@ class Punish():
 			return None
 
 		with self.bot.dbholder.interact() as cur:
-			res = cur.get_structured_db_info(self.user)
+			res = cur.get_structured_db_info_for_warn(self.user)
 
 			if not res:
 				dat = {}
@@ -176,7 +176,7 @@ class Punish():
 			return None
 
 		with self.bot.dbholder.interact() as cur:
-			res = cur.get_structured_db_info(self.user)
+			res = cur.get_structured_db_info_for_warn(self.user)
 
 			if not res:
 				return None
@@ -204,7 +204,7 @@ class Punish():
 			return None
 
 		with self.bot.dbholder.interact() as cur:
-			res = cur.get_structured_db_info(self.user)
+			res = cur.get_structured_db_info_for_warn(self.user)
 
 			if not res:
 				return None

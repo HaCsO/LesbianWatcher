@@ -33,7 +33,7 @@ class Mods(commands.Cog):
 	@commands.Cog.listener()
 	async def on_member_join(self, member):
 		with self.bot.dbholder.interact() as cur:
-			res = cur.get_structured_db_info(self.user)
+			res = cur.get_structured_db_info_for_warn(self.user)
 			if not res:
 				return
 		

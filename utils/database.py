@@ -2,7 +2,7 @@ import sqlite3
 import contextlib
 
 class LesCursor(sqlite3.Cursor):
-	def get_structured_db_info(self, user):
+	def get_structured_db_info_for_warn(self, user):
 		self.execute(f"SELECT * FROM warn WHERE id = '{user.id}'")
 		res = self.fetchall()
 		if not res:

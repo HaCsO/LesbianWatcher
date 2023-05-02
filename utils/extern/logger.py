@@ -16,7 +16,7 @@ class Logger():
 			"ru": DefaulLogMsgs("ru", "localisation/ru.toml"),
 			"en": DefaulLogMsgs("en", "localisation/eng.toml")
 		}
-		self.choosen_localise = "ru"
+		self.choosen_localise = "en" # hardcode go brrrr
 
 	def update_log_channel(self):
 		channel = self.bot.config.channels["log"]
