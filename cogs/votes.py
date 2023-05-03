@@ -15,9 +15,43 @@ class Votes(commands.Cog):
 		self.fetchet_votes = {}
 		self.votecache = {}
 
-	@tasks.loop(minutes=5)
+	def get_vote_channel(self):
+		return self.bot.get_guild(self.bot.config.bot["guild_id"]).get_channel(self.bot.config.channels["vote"])
+
+	async def get_vote_message(self, vote):
+		return await self.get_vote_channel().fetch_message(vote.message_id)
+
+	@commands.Cog.listener()
+	async def on_ready(self):
+		if not self.voteloop.is_running():
+			self.voteloop.start()
+	
+	@tasks.loop(minutes=1)
 	async def voteloop(self):
-		...
+		with self.bot.dbholder.interact() as cur:
+			cur.execute("SELECT message_id FROM vote")
+			votes = cur.fetchall()
+
+		for i in votes:
+			vote = Vote(self.bot)
+			vote.grab_from_database(i[0])
+			if vote.check_done():
+				msg = await self.get_vote_message(vote)
+				await vote.edit_message_to_final(msg)
+				vote.remove_from_db()
+				await self.get_vote_channel().send(vote.get_mentions_str(), delete_after=15)
+
+	@is_staff()
+	@commands.slash_command()
+	async def check_vote(self, ctx, msg_id):
+		vote = Vote(self.bot)
+		vote.grab_from_database(msg_id)
+		msg = await self.get_vote_message(vote)
+		res = await vote.result(msg)
+		mes = f"https://ptb.discord.com/channels/{ctx.guild.id}/{ctx.channel.id}/{msg_id} \n"
+		for k, v in res.items():
+			mes += f"{k} = {v}\n"
+		await ctx.respond(f"{mes}")
 
 	@is_staff()
 	@commands.slash_command()
