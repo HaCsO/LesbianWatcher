@@ -86,7 +86,7 @@ class Punish():
 			return None
 		
 		try:
-			role = self.bot.get_guild(self.bot.guild_id).get_role(role_id)
+			role = self.bot.get_role_by_known_guild(role_id)
 		except:
 			await self.bot.logger.log_localised("role_not_found")
 			return None
@@ -127,7 +127,7 @@ class Punish():
 			return None
 		
 		try:
-			role = self.bot.get_guild(self.bot.guild_id).get_role(role_id)
+			role = self.bot.get_role_by_known_guild(role_id)
 		except:
 			await self.bot.logger.log_localised("role_not_found")
 			return None
@@ -170,7 +170,7 @@ class Punish():
 			return None
 		
 		try:
-			role = self.bot.get_guild(self.bot.guild_id).get_role(role_id)
+			role = self.bot.get_role_by_known_guild(role_id)
 		except:
 			await self.bot.logger.log_localised("role_not_found")
 			return None
@@ -198,7 +198,7 @@ class Punish():
 			return None
 		
 		try:
-			role = self.bot.get_guild(self.bot.guild_id).get_role(role_id)
+			role = self.bot.get_role_by_known_guild(role_id)
 		except:
 			await self.bot.logger.log_localised("role_not_found")
 			return None

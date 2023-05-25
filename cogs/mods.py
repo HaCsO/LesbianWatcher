@@ -4,6 +4,7 @@ import json
 import datetime
 import sys
 import os
+import re
 sys.path.append(os.path.abspath("../utils"))
 from utils.discord_helpers.gui_assets import *
 from utils.discord_helpers.access import *
@@ -23,7 +24,7 @@ class Mods(commands.Cog):
 			return
 		
 		try:
-			role = self.bot.get_guild(self.bot.guild_id).get_role(role)
+			role = self.bot.get_role_by_known_guild(role)
 		except:
 			await self.bot.logger.log_localised("role_not_found")
 			return None
@@ -57,7 +58,7 @@ class Mods(commands.Cog):
 			dat = cur.fetchall()
 			checktime = datetime.datetime.now()
 			for user in dat:
-				duser = self.bot.get_guild(self.bot.guild_id).get_member(int(user[0]))
+				duser = self.bot.get_user_by_known_guild(int(user[0]))
 				warncontent = Punish(self.bot.user, duser, self.bot)
 				warns = json.loads(user[1])
 				mime = json.loads(user[3])
@@ -121,7 +122,7 @@ class Mods(commands.Cog):
 			cur.execute("SELECT * FROM warn")
 			res = cur.fetchall()
 			for us in res:
-				duser = self.bot.get_guild(self.bot.guild_id).get_member(int(us[0]))
+				duser = self.bot.get_user_by_known_guild(int(us[0]))
 				desc += f"{duser.mention} - {us[2]} варнов{' - КЛОУН' if len(json.loads(us[4])) else ''} {' - МИМ' if len(json.loads(us[3])) else ''}\n"
 
 		emb = discord.Embed(title="Список нарушителей", description=desc, color=0xffa586)
@@ -277,6 +278,57 @@ class Mods(commands.Cog):
 		emb = discord.Embed(title="Просмотр данных о текущей конфигурации.", description=desc, color=0x0099ff)
 		emb.set_footer(text="Поля оглавления bot не указаны, так как это не безопасно.")
 		await ctx.respond(embed= emb)
+
+	def build_embed(self, data):
+		author = data.get("a") or data.get("author").get("name") or data.get("author")
+		img = data.get("i") or data.get("image")
+		thumbnail = data.get("tn") or data.get("thumbnail")
+		fields = data.get("f") or data.get("fields")
+		tmspt = data.get("dt") or data.get("datatime")
+		footer = data.get("fo") or data.get("footer").get("text") or data.get("footer")
+		emb = discord.Embed(
+			title=data.get("t") or data.get("title") or data.get("name"),
+			description=data.get("d") or data.get("description") or data.get("desc"),
+			color=int(data.get("C") or data.get("color") or data.get("colour") or 0)
+			)
+		if author:
+			emb.set_author(name=author)
+		if tmspt:
+			emb.timestamp = datetime.datetime.fromtimestamp(float(tmspt))
+		if fields:
+			for f in fields:
+				emb.add_field(
+					name= f.get("n") or f.get("name"),
+					value= f.get("v") or f.get("value"),
+					inline= f.get("i") or f.get("inline")
+					)
+		if footer:
+			emb.set_footer(text=footer)
+		if img:
+			emb.set_image(url=img)
+		if thumbnail:
+			emb.set_thumbnail(url=thumbnail)
+		return emb
+
+	@is_headstaff()
+	@commands.slash_command()
+	async def say(self, ctx:discord.ApplicationContext, data: discord.Option(description="Данные формата: `текст {данные}`", input_type=str), channel: discord.TextChannel = None):
+		emb = None
+		text = None
+		js = re.search("[\x7B].*[\x7D]", data)
+		if js:
+			borders = js.span()
+			text = data[0:borders[0]] + data[borders[1]:]
+			js = js[0]
+			rawdata = json.loads(js)
+			emb = self.build_embed(rawdata)
+		else:
+			text = data
+		if channel:
+			m = await channel.send(embed = emb, content=text)
+		else:
+			m = await ctx.send(embed= emb, content=text)
+		await ctx.send_response(f"Сообщение успешно отправленно в {m.channel.mention}", ephemeral= True)
 
 def setup(bot):
 	bot.add_cog(Mods(bot))

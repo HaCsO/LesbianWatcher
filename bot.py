@@ -24,6 +24,15 @@ class LesBot(commands.Bot):
 			emb = discord.Embed(title="Клоун", description=f"Пользователь {user.mention} получил статус клоуна. Рекомендуется полная его блокировка!", color=0xff0000)
 			await self.get_channel(self.config.channels["talk"]).send(f"<@!{self.config.users['headmod']}>", embed= emb)
 
+	async def get_user_by_known_guild(self, id):
+		return self.get_guild(self.guild_id).get_member(id)
+
+	async def get_role_by_known_guild(self, id):
+		return self.get_guild(self.get_guild).get_role(id)
+	
+	async def get_channel_by_known_guild(self, id):
+		return self.get_guild(self.guild_id).get_channel(id)
+
 Bot = LesBot(command_prefix="!", intents= intents)
 
 @Bot.event

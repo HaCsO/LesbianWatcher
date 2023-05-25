@@ -16,7 +16,7 @@ class Votes(commands.Cog):
 		self.votecache = {}
 
 	def get_vote_channel(self):
-		return self.bot.get_guild(self.bot.config.bot["guild_id"]).get_channel(self.bot.config.channels["vote"])
+		return self.bot.get_channel_by_known_guild(self.bot.config.channels["vote"])
 
 	async def get_vote_message(self, vote):
 		return await self.get_vote_channel().fetch_message(vote.message_id)
